@@ -15,6 +15,7 @@ struct EditorToolbarView: View {
     @ObservedObject var textVM: TextOverlayViewModel
     
     var onTextTapped: () -> Void
+    var canvasSize: CGSize
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -32,10 +33,10 @@ struct EditorToolbarView: View {
                 }
 
                 ToolButton(systemName: "camera.filters", isActive: false) {
-                    // Впечатываем рисунок перед фильтрацией
+                    // Apply drawing to image before filtering
                     editorVM.drawingVM.applyDrawingToImage(
                         baseImage: editorVM.selectedImage,
-                        canvasSize: CGSize(width: 300, height: 300), // при желании заменить на реальный canvasSize
+                        canvasSize: canvasSize, //  Dynamic canvas size based on actual image dimensions
                         rotationAngle: editorVM.rotationAngle,
                         offset: editorVM.imageOffset,
                         scale: editorVM.imageScale,

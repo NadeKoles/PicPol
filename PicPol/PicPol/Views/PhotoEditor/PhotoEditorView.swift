@@ -26,6 +26,7 @@ struct PhotoEditorView: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var isFirstAppear = true
     @State private var saveErrorMessage: String?
+    @State private var currentCanvasSize: CGSize = CGSize(width: 300, height: 300)
 
     
     // MARK: - Init
@@ -36,6 +37,7 @@ struct PhotoEditorView: View {
         _textVM = StateObject(wrappedValue: TextOverlayViewModel())
         _selectedItem = State(initialValue: nil)
         _showTextEditor = State(initialValue: false)
+        _currentCanvasSize = State(initialValue: CGSize(width: 300, height: 300))
     }
 
     
@@ -65,6 +67,12 @@ struct PhotoEditorView: View {
                     if let image = editorVM.selectedImage {
                         let size = calculateWorkingArea(in: geometry)
                         ImageEditorAreaView(image: image, usableSize: size, editorVM: editorVM, textVM: textVM)
+                            .onAppear {
+                                currentCanvasSize = size
+                            }
+                            .onChange(of: geometry.size) { _ in
+                                currentCanvasSize = calculateWorkingArea(in: geometry)
+                            }
                     } else if selectedItem != nil {
                         ProgressView()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -84,7 +92,8 @@ struct PhotoEditorView: View {
                     textVM: textVM,
                     onTextTapped: {
                         showTextEditor = true
-                    }
+                    },
+                    canvasSize: currentCanvasSize
                 )
             }
             .background(AppColors.background)
