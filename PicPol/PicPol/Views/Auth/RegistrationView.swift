@@ -18,7 +18,7 @@ struct RegistrationView: View {
                 .inputStyle()
 
             SecureField("Password", text: $authVM.password)
-                .textFieldStyle(.roundedBorder)
+                .inputStyle()
 
             Button(action: {
                 authVM.signUp()
@@ -38,6 +38,7 @@ struct RegistrationView: View {
             .secondaryButton()
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
