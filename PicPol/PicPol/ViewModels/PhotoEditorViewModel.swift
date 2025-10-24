@@ -21,6 +21,7 @@ class PhotoEditorViewModel: ObservableObject {
     @Published var lastScale: CGFloat = 1.0
     @Published var drawingVM = DrawingViewModel()
     @Published var isDrawing: Bool = false
+    @Published var undoRedoState: Bool = false
 
 
     // MARK: - Image Transformation History
@@ -43,7 +44,7 @@ class PhotoEditorViewModel: ObservableObject {
     private var redoStack: [EditorState] = []
 
     var canUndo: Bool {
-        history.count >= 2
+        history.count > 1
     }
 
     var canRedo: Bool {
@@ -61,10 +62,15 @@ class PhotoEditorViewModel: ObservableObject {
         guard history.last != state else { return }
         history.append(state)
         redoStack.removeAll()
+        DispatchQueue.main.async {
+            self.undoRedoState.toggle() // Force immediate UI update
+        }
     }
 
     func undo() {
-        guard history.count >= 2 else { return }
+        guard history.count > 1 else { 
+            return 
+        }
         let last = history.removeLast()
         redoStack.append(last)
         if let previous = history.last {
@@ -73,6 +79,9 @@ class PhotoEditorViewModel: ObservableObject {
             imageScale = previous.scale
             lastScale = previous.scale
             selectedImage = previous.image
+            DispatchQueue.main.async {
+                self.undoRedoState.toggle() // Force immediate UI update
+            }
         }
     }
 

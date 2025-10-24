@@ -24,14 +24,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 }
 
 @main
-struct PhotoEditorApp: App {
+struct PicPolApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @StateObject private var authVM = AuthViewModel() // Добавляем здесь
+    @StateObject private var authVM = AuthViewModel()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(authVM) // Передаем в окружение
+                .environmentObject(authVM)
         }
     }
 }

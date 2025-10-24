@@ -16,6 +16,8 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to select images for editing.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need access to your photo library to save edited images.</string>
 	<key>UIStatusBarStyle</key>
