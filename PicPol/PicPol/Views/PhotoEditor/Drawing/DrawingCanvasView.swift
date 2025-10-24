@@ -28,14 +28,17 @@ struct DrawingCanvasView: UIViewRepresentable {
             uiView.drawing = currentDrawing
         }
         
-        // Настройка инструмента рисования каждый раз при обновлении
-        DispatchQueue.main.async {
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let window = windowScene.windows.first {
-                let toolPicker = PKToolPicker.shared(for: window)
-                toolPicker?.setVisible(true, forFirstResponder: uiView)
-                toolPicker?.addObserver(uiView)
-                uiView.becomeFirstResponder()
+        // Set up tool picker only once to prevent memory leak
+        if context.coordinator.toolPickerSetup == false {
+            context.coordinator.toolPickerSetup = true
+            DispatchQueue.main.async {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first {
+                    let toolPicker = PKToolPicker.shared(for: window)
+                    toolPicker?.setVisible(true, forFirstResponder: uiView)
+                    toolPicker?.addObserver(uiView)
+                    uiView.becomeFirstResponder()
+                }
             }
         }
     }
@@ -47,6 +50,7 @@ struct DrawingCanvasView: UIViewRepresentable {
     class Coordinator: NSObject, PKCanvasViewDelegate {
         weak var canvasView: PKCanvasView?
         let onDrawingChanged: (PKDrawing) -> Void
+        var toolPickerSetup = false  // Track if setup is done
 
         init(onDrawingChanged: @escaping (PKDrawing) -> Void) {
             self.onDrawingChanged = onDrawingChanged
