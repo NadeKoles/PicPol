@@ -25,6 +25,7 @@ struct PhotoEditorView: View {
     @State private var showTextEditor = false
     @State private var selectedItem: PhotosPickerItem?
     @State private var isFirstAppear = true
+    @State private var saveErrorMessage: String?
 
     
     // MARK: - Init
@@ -41,7 +42,18 @@ struct PhotoEditorView: View {
     private func saveToPhotos() {
         guard let image = editorVM.selectedImage else { return }
         let saver = ImageSaver()
-        saver.save(image)
+        saver.save(image) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    // Success - could show a toast notification here
+                    print("✅ Image saved successfully!")
+                case .failure(let error):
+                    // Show error to user
+                    self.saveErrorMessage = error.localizedDescription
+                }
+            }
+        }
     }
     
     
@@ -153,6 +165,16 @@ struct PhotoEditorView: View {
                 if let image = editorVM.selectedImage {
                     TextOverlayFullScreenView(viewModel: textVM, editorVM: editorVM, backgroundImage: image)
                 }
+            }
+            .alert("Save Error", isPresented: Binding<Bool>(
+                get: { saveErrorMessage != nil },
+                set: { _ in saveErrorMessage = nil }
+            )) {
+                Button("OK") {
+                    saveErrorMessage = nil
+                }
+            } message: {
+                Text(saveErrorMessage ?? "")
             }
         }
     

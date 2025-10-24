@@ -21,7 +21,7 @@ struct TextOverlayView: View {
                     // MARK: - Text Field Input
                     TextField("Enter text", text: Binding(
                         get: { overlay.text },
-                        set: { viewModel.textOverlay?.text = $0 }
+                        set: { viewModel.updateText($0) }
                     ))
                     .font(.custom(overlay.fontName, size: overlay.fontSize))
                     .foregroundColor(Color(hex: overlay.colorHex, alpha: overlay.alpha))
@@ -51,8 +51,12 @@ struct TextOverlayView: View {
                         dragOffset = drag.translation
                     }
                     .onEnded { drag in
-                        viewModel.textOverlay?.position.width += drag.translation.width
-                        viewModel.textOverlay?.position.height += drag.translation.height
+                        guard let overlay = viewModel.textOverlay else { return }
+                        let newPosition = CGSize(
+                            width: overlay.position.width + drag.translation.width,
+                            height: overlay.position.height + drag.translation.height
+                        )
+                        viewModel.updatePosition(newPosition)
                         dragOffset = .zero
                     }
                 : nil
