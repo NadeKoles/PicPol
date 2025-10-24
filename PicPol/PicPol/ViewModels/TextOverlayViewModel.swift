@@ -31,6 +31,16 @@ class TextOverlayViewModel: ObservableObject {
         textOverlay = nil
     }
     
+    func updateText(_ newText: String) {
+        guard textOverlay != nil else { return }
+        textOverlay?.text = newText
+    }
+    
+    func updatePosition(_ newPosition: CGSize) {
+        guard textOverlay != nil else { return }
+        textOverlay?.position = newPosition
+    }
+    
     func renderText(on image: UIImage) -> UIImage {
          guard let overlay = textOverlay else { return image }
 

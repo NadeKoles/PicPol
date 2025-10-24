@@ -10,7 +10,6 @@ import Combine
 import GoogleSignIn
 import FirebaseAuth
 import FirebaseCore
-import SwiftUICore
 import SwiftUI
 
 class AuthViewModel: ObservableObject {
