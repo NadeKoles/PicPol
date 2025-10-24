@@ -66,5 +66,6 @@ struct LoginView: View {
             .errorAlert($authVM.errorMessage)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
