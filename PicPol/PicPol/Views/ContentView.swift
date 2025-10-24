@@ -11,7 +11,6 @@ import GoogleSignIn
 import FirebaseAuth
 import FirebaseCore
 
-
 struct ContentView: View {
     @EnvironmentObject var authVM: AuthViewModel
 
