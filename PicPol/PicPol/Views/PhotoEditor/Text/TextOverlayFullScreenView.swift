@@ -21,6 +21,7 @@ struct TextOverlayFullScreenView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .rotationEffect(editorVM.rotationAngle)
 
             TextOverlayView(viewModel: viewModel)
 

@@ -124,7 +124,8 @@ class PhotoEditorViewModel: ObservableObject {
 
     func applyText(from textVM: TextOverlayViewModel) {
         guard let baseImage = selectedImage else { return }
-        let result = textVM.renderText(on: baseImage)
+        // Pass rotation angle so text can be rendered correctly on rotated images
+        let result = textVM.renderText(on: baseImage, rotationAngle: rotationAngle)
         selectedImage = result
         commitChange()
     }
