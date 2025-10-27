@@ -9,7 +9,6 @@ import SwiftUI
 
 struct EditorToolbarView: View {
     // MARK: - Props
-    
     @ObservedObject var editorVM: PhotoEditorViewModel
     @ObservedObject var filterVM: FilterViewModel
     @ObservedObject var textVM: TextOverlayViewModel
@@ -34,16 +33,12 @@ struct EditorToolbarView: View {
 
                 ToolButton(systemName: "camera.filters", isActive: false) {
                     // Cycle through filters
-                    if let image = editorVM.selectedImage {
-                        filterVM.setOriginalImage(image)
-                        filterVM.cycleFilter()
-                        
-                        if let filtered = filterVM.filteredImage {
-                            editorVM.selectedImage = filtered
-                        }
+                    filterVM.cycleFilter()
+                    
+                    if let filtered = filterVM.filteredImage {
+                        editorVM.selectedImage = filtered
                     }
                 }
-
                 
                 ToolButton(systemName: "textformat", isActive: false) {
                     textVM.textOverlay = TextOverlay(text: "Text")
@@ -51,13 +46,18 @@ struct EditorToolbarView: View {
                     onTextTapped()
                 }
                 
-                // MARK: - Drawing Mode
                 ToolButton(systemName: "pencil.tip", isActive: editorVM.isDrawing) {
                     editorVM.isDrawing.toggle()
                 }
 
                 ToolButton(systemName: "arrow.counterclockwise.circle", isActive: false) {
                     editorVM.resetTransformations()
+                    textVM.reset()                    
+                    filterVM.reset()
+                    // Reset to the truly original image (without any baked text)
+                    if let original = filterVM.originalBaseImage {
+                        editorVM.resetHistory(with: original)
+                    }
                 }
             }
             .padding()

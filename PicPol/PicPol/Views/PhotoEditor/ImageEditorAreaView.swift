@@ -38,6 +38,9 @@ struct ImageEditorAreaView: View {
             // MARK: - Text Overlay Layer
             if textVM.textOverlay != nil {
                 TextOverlayView(viewModel: textVM)
+                    .rotationEffect(editorVM.rotationAngle)
+                    .offset(editorVM.imageOffset)
+                    .scaleEffect(editorVM.imageScale)
             }
         }
     }
