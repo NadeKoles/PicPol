@@ -28,7 +28,6 @@ struct PhotoEditorView: View {
     @State private var saveErrorMessage: String?
     @State private var currentCanvasSize: CGSize = CGSize(width: 300, height: 300)
 
-    
     // MARK: - Init
     init(preloadedImage: UIImage? = nil) {
         self.preloadedImage = preloadedImage
@@ -40,8 +39,8 @@ struct PhotoEditorView: View {
         _currentCanvasSize = State(initialValue: CGSize(width: 300, height: 300))
     }
 
-    
     private func saveToPhotos() {
+        // Text is already baked into the image when user clicks "Done" in text editor
         guard let image = editorVM.selectedImage else { return }
         let saver = ImageSaver()
         saver.save(image) { result in
@@ -57,12 +56,10 @@ struct PhotoEditorView: View {
             }
         }
     }
-    
-    
+     
     var body: some View {
             VStack(spacing: 0) {
                 // MARK: - Image Editing Area
-
                 GeometryReader { geometry in
                     if let image = editorVM.selectedImage {
                         let size = calculateWorkingArea(in: geometry)
@@ -100,8 +97,6 @@ struct PhotoEditorView: View {
             .navigationTitle("Picture Polish")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
-
-           
             // MARK: - Image Picker
             .onChange(of: selectedItem) {
                 Task {
@@ -122,8 +117,7 @@ struct PhotoEditorView: View {
                         filterVM.setOriginalImage(image)
                     }
                 }
-            }
-        
+            }        
             // MARK: - Navigation & Toolbar
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -172,7 +166,7 @@ struct PhotoEditorView: View {
             }
             .fullScreenCover(isPresented: $showTextEditor) {
                 if let image = editorVM.selectedImage {
-                    TextOverlayFullScreenView(viewModel: textVM, editorVM: editorVM, backgroundImage: image)
+                    TextOverlayFullScreenView(viewModel: textVM, editorVM: editorVM, filterVM: filterVM, backgroundImage: image)
                 }
             }
             .alert("Save Error", isPresented: Binding<Bool>(
@@ -186,10 +180,8 @@ struct PhotoEditorView: View {
                 Text(saveErrorMessage ?? "")
             }
         }
-    
 
     // MARK: - Layout Helpers
-
     private func calculateWorkingArea(in geometry: GeometryProxy) -> CGSize {
         let fullWidth = geometry.size.width
         let usableHeight = geometry.size.height - 80

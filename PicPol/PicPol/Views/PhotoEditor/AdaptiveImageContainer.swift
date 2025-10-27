@@ -11,8 +11,6 @@ import Foundation
 
 
 struct AdaptiveImageContainer: View {
-    // MARK: - Props
-
     let image: UIImage
     let isDraggable: Bool
     let maxSize: CGSize
@@ -23,36 +21,29 @@ struct AdaptiveImageContainer: View {
     @Binding var scale: CGFloat
     @Binding var lastScale: CGFloat
 
-    // MARK: - State
     @State private var lastOffset: CGSize = .zero
 
     // MARK: - Layout Calculation
-
     private var fittedSize: CGSize {
         let normalizedAngle = ((rotationAngle.degrees.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360))
         let absoluteAngle = abs(normalizedAngle)
         let isRotated = absoluteAngle == 90 || absoluteAngle == 270
         
-        // Определяем тип изображения
         let aspectRatio = image.size.width / image.size.height
-        let isHorizontal = aspectRatio > 1.1       // Ширина > высоты (с запасом)
-        let isVertical = aspectRatio < 0.9         // Высота > ширины (с запасом)
+        let isHorizontal = aspectRatio > 1.1
+        let isVertical = aspectRatio < 0.9
 
-        // 1. Обработка горизонтальных изображений
         if isHorizontal {
             if isRotated {
-                // Горизонтальное → поворот в вертикальное
                 let targetHeight = maxSize.height
                 let targetWidth = targetHeight * (image.size.height / image.size.width)
                 return CGSize(width: targetWidth, height: targetHeight)
             } else {
-                // Горизонтальное без поворота
                 let targetWidth = maxSize.width
                 let targetHeight = targetWidth * (image.size.height / image.size.width)
                 return CGSize(width: targetWidth, height: targetHeight)
             }
         }
-        // 2. Обработка вертикальных изображений (идеальное решение из вашего кода)
         else if isVertical {
             let baseImageSize = isRotated
                 ? CGSize(width: image.size.height, height: image.size.width)
@@ -75,9 +66,7 @@ struct AdaptiveImageContainer: View {
                 return CGSize(width: width, height: height)
             }
         }
-        // 3. Обработка квадратных изображений
         else {
-            // Для квадрата просто вписываем в меньшую сторону контейнера
             let containerMinSide = min(maxSize.width, maxSize.height)
             return CGSize(width: containerMinSide, height: containerMinSide)
         }
@@ -91,7 +80,6 @@ struct AdaptiveImageContainer: View {
     }
 
     // MARK: - Body
-
     var body: some View {
         Image(uiImage: image)
             .resizable()
@@ -107,7 +95,6 @@ struct AdaptiveImageContainer: View {
     }
 
     // MARK: - Gestures
-
     private var magnificationGesture: some Gesture {
         MagnificationGesture()
             .onChanged { value in
@@ -131,7 +118,6 @@ struct AdaptiveImageContainer: View {
                 let dx = value.translation.width
                 let dy = value.translation.height
 
-                // Поворачиваем вектор
                 let rotatedX = dx * CGFloat(cos(angle)) - dy * CGFloat(sin(angle))
                 let rotatedY = dx * CGFloat(sin(angle)) + dy * CGFloat(cos(angle))
 

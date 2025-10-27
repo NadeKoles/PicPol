@@ -11,6 +11,7 @@ struct TextOverlayFullScreenView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var viewModel: TextOverlayViewModel
     @ObservedObject var editorVM: PhotoEditorViewModel
+    @ObservedObject var filterVM: FilterViewModel
     let backgroundImage: UIImage
 
     var body: some View {
@@ -33,14 +34,20 @@ struct TextOverlayFullScreenView: View {
                     onUndo: {},
                     onRedo: {},
                     onCancel: {
-                        viewModel.isAddingText = false   // сброс при отмене
+                        viewModel.isAddingText = false  
                         viewModel.reset() 
                         dismiss()
                     },
                     onDone: {
-                        viewModel.isAddingText = false   // сброс при сохранении
-                        editorVM.applyText(from: viewModel)
-                        viewModel.reset()  
+                        if viewModel.textOverlay != nil {
+                            editorVM.applyText(from: viewModel)
+                            // Update filter's original image to include the baked text
+                            if let updatedImage = editorVM.selectedImage {
+                                filterVM.updateOriginalImage(updatedImage)
+                            }
+                            viewModel.reset()
+                        }
+                        viewModel.isAddingText = false
                         dismiss()
                     }
                 )

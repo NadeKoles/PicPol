@@ -14,6 +14,7 @@ class FilterViewModel: ObservableObject {
     @Published var shouldApplyFilter = false
 
     private var originalImage: UIImage?
+    private var baseImage: UIImage?  // Stores the truly original image (never modified)
     private var currentFilterIndex = 0
 
     private let filters: [CIFilter] = [
@@ -26,12 +27,44 @@ class FilterViewModel: ObservableObject {
     private let context = CIContext()
 
     func setOriginalImage(_ image: UIImage) {
-        // Only reset if we don't have an original yet or if image changed
+        // Only reset if we don't have an original yet
         if originalImage == nil {
             originalImage = image
+            baseImage = image  // Store the truly original image
             filteredImage = image
             currentFilterIndex = 0  // Start at 0 so first tap goes to 1 (Sepia)
             shouldApplyFilter = false
+        }
+    }
+    
+    func updateOriginalImage(_ image: UIImage) {
+        // Update the original image without resetting filter index
+        // This is used when text or drawings are baked into the image
+        originalImage = image
+        
+        // Re-apply current filter if one is active
+        if currentFilterIndex == 0 {
+            filteredImage = image
+        } else {
+            // Re-apply the current filter to the new original image
+            guard let cgImage = image.cgImage else { return }
+            let ciImage = CIImage(cgImage: cgImage)
+            
+            let filter: CIFilter
+            switch currentFilterIndex {
+            case 1: filter = CIFilter.sepiaTone()
+            case 2: filter = CIFilter.photoEffectNoir()
+            case 3: filter = CIFilter.photoEffectChrome()
+            case 4: filter = CIFilter.photoEffectFade()
+            default: filter = CIFilter.sepiaTone()
+            }
+            
+            filter.setValue(ciImage, forKey: kCIInputImageKey)
+            
+            if let outputImage = filter.outputImage,
+               let cgResult = context.createCGImage(outputImage, from: outputImage.extent) {
+                self.filteredImage = UIImage(cgImage: cgResult)
+            }
         }
     }
 
@@ -44,11 +77,8 @@ class FilterViewModel: ObservableObject {
             currentFilterIndex = 0
         }
         
-        print("🔍 Filter tap - index: \(currentFilterIndex)")
-        
         // If index is 0, return original image
         if currentFilterIndex == 0 {
-            print("   → Showing: Original")
             self.filteredImage = originalImage
             return
         }
@@ -62,19 +92,14 @@ class FilterViewModel: ObservableObject {
         switch currentFilterIndex {
         case 1:
             filter = CIFilter.sepiaTone()
-            print("   → Showing: Sepia")
         case 2:
             filter = CIFilter.photoEffectNoir()
-            print("   → Showing: Noir (B&W)")
         case 3:
             filter = CIFilter.photoEffectChrome()
-            print("   → Showing: Chrome")
         case 4:
             filter = CIFilter.photoEffectFade()
-            print("   → Showing: Fade")
         default:
             filter = CIFilter.sepiaTone()
-            print("   → Showing: Sepia (default)")
         }
         
         filter.setValue(ciImage, forKey: kCIInputImageKey)
@@ -87,5 +112,18 @@ class FilterViewModel: ObservableObject {
 
     func applyCurrentFilter() {
         shouldApplyFilter = true
+    }
+    
+    func reset() {
+        // Reset to the truly original image (before any text or modifications)
+        originalImage = baseImage
+        filteredImage = baseImage
+        currentFilterIndex = 0
+        shouldApplyFilter = false
+    }
+    
+    // Public getter for the base image
+    var originalBaseImage: UIImage? {
+        return baseImage
     }
 }
