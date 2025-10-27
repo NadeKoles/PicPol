@@ -19,8 +19,8 @@ struct DrawingCanvasView: UIViewRepresentable {
         canvasView.isOpaque = false
         canvasView.backgroundColor = .clear
         canvasView.delegate = context.coordinator
+        canvasView.clipsToBounds = true
         
-        // Set up tool picker immediately
         DispatchQueue.main.async {
             self.setupToolPickerImmediately(for: canvasView)
         }
@@ -33,7 +33,8 @@ struct DrawingCanvasView: UIViewRepresentable {
             uiView.drawing = currentDrawing
         }
         
-        // Ensure tool picker is visible when drawing mode is active
+        uiView.clipsToBounds = true
+        
         DispatchQueue.main.async {
             self.setupToolPicker(for: uiView)
         }
@@ -45,14 +46,10 @@ struct DrawingCanvasView: UIViewRepresentable {
             if let window = windows.first {
                 let toolPicker = PKToolPicker.shared(for: window)
                 
-                // Force the canvas to become first responder first
                 canvasView.becomeFirstResponder()
-                
-                // Set up the tool picker
                 toolPicker?.addObserver(canvasView)
                 toolPicker?.setVisible(true, forFirstResponder: canvasView)
                 
-                // Force visibility with multiple attempts
                 DispatchQueue.main.async {
                     toolPicker?.setVisible(true, forFirstResponder: canvasView)
                     canvasView.becomeFirstResponder()
@@ -75,13 +72,11 @@ struct DrawingCanvasView: UIViewRepresentable {
                 toolPicker?.addObserver(canvasView)
                 canvasView.becomeFirstResponder()
                 
-                // Multiple aggressive attempts to make it visible
                 for i in 1...10 {
                     DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.1) {
                         toolPicker?.setVisible(true, forFirstResponder: canvasView)
                         canvasView.becomeFirstResponder()
                         
-                        // If it becomes visible, we can stop trying
                         if toolPicker?.isVisible == true {
                             return
                         }
