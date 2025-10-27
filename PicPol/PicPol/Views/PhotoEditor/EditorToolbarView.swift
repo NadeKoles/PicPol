@@ -33,23 +33,14 @@ struct EditorToolbarView: View {
                 }
 
                 ToolButton(systemName: "camera.filters", isActive: false) {
-                    // Apply drawing to image before filtering
-                    editorVM.drawingVM.applyDrawingToImage(
-                        baseImage: editorVM.selectedImage,
-                        canvasSize: canvasSize, //  Dynamic canvas size based on actual image dimensions
-                        rotationAngle: editorVM.rotationAngle,
-                        offset: editorVM.imageOffset,
-                        scale: editorVM.imageScale,
-                        commit: editorVM.commitChange,
-                        setResult: { editorVM.selectedImage = $0 }
-                    )
-
-                    filterVM.setOriginalImage(editorVM.selectedImage!)
-                    filterVM.applyNextFilter()
-
-                    if let filtered = filterVM.filteredImage {
-                        editorVM.selectedImage = filtered
-                        editorVM.commitChange()
+                    // Cycle through filters
+                    if let image = editorVM.selectedImage {
+                        filterVM.setOriginalImage(image)
+                        filterVM.cycleFilter()
+                        
+                        if let filtered = filterVM.filteredImage {
+                            editorVM.selectedImage = filtered
+                        }
                     }
                 }
 

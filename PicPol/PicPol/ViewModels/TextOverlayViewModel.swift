@@ -41,7 +41,7 @@ class TextOverlayViewModel: ObservableObject {
         textOverlay?.position = newPosition
     }
     
-    func renderText(on image: UIImage) -> UIImage {
+    func renderText(on image: UIImage, rotationAngle: Angle = .zero) -> UIImage {
          guard let overlay = textOverlay else { return image }
 
          let imageSize = image.size
@@ -56,9 +56,9 @@ class TextOverlayViewModel: ObservableObject {
          context?.setShouldAntialias(true)
          context?.interpolationQuality = .high
 
-         let screenWidth = UIScreen.main.bounds.width
-         let scaleFactor = imageSize.width / screenWidth
-         let adjustedFontSize = overlay.fontSize * scaleFactor
+         // Use actual image dimensions for scaling, not screen coordinates
+         let screenSize = UIScreen.main.bounds.size
+         let adjustedFontSize = overlay.fontSize * (imageSize.width / screenSize.width)
 
          let font = UIFont(name: overlay.fontName, size: adjustedFontSize)
              ?? UIFont.systemFont(ofSize: adjustedFontSize)
@@ -71,10 +71,20 @@ class TextOverlayViewModel: ObservableObject {
          let text = overlay.text as NSString
          let textSize = text.size(withAttributes: attributes)
 
+         // Use a single scale factor that works for both rotated and non-rotated images
+         let scaleFactor = imageSize.width / screenSize.width
+         
          let center = CGPoint(
              x: imageSize.width / 2 + overlay.position.width * scaleFactor,
              y: imageSize.height / 2 + overlay.position.height * scaleFactor
          )
+
+         // Rotate context by negative angle to keep text upright on rotated image
+         if rotationAngle != .zero {
+             context?.translateBy(x: center.x, y: center.y)
+             context?.rotate(by: -CGFloat(rotationAngle.radians))
+             context?.translateBy(x: -center.x, y: -center.y)
+         }
 
          let textRect = CGRect(
              origin: CGPoint(x: center.x - textSize.width / 2,

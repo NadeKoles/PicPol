@@ -29,7 +29,7 @@ struct AdaptiveImageContainer: View {
     // MARK: - Layout Calculation
 
     private var fittedSize: CGSize {
-        let normalizedAngle = rotationAngle.degrees.truncatingRemainder(dividingBy: 360)
+        let normalizedAngle = ((rotationAngle.degrees.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360))
         let absoluteAngle = abs(normalizedAngle)
         let isRotated = absoluteAngle == 90 || absoluteAngle == 270
         
@@ -147,27 +147,4 @@ struct AdaptiveImageContainer: View {
             }
     }
 
-}
-
-extension UIImage {
-    func scaled(to size: CGSize) -> UIImage {
-        let imageAspect = self.size.width / self.size.height
-        let targetAspect = size.width / size.height
-
-        var targetSize: CGSize
-        if imageAspect > targetAspect {
-            let width = size.width
-            let height = width / imageAspect
-            targetSize = CGSize(width: width, height: height)
-        } else {
-            let height = size.height
-            let width = height * imageAspect
-            targetSize = CGSize(width: width, height: height)
-        }
-
-        let renderer = UIGraphicsImageRenderer(size: targetSize)
-        return renderer.image { _ in
-            self.draw(in: CGRect(origin: .zero, size: targetSize))
-        }
-    }
 }
