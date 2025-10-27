@@ -17,7 +17,7 @@ struct DrawingOverlayView: View {
     var body: some View {
         GeometryReader { fullGeometry in
             VStack(spacing: 0) {
-                // MARK: - Header Controls
+                // MARK: - Header
                 HStack {
                     Button("Cancel") {
                         drawingVM.resetDrawingHistory()
@@ -60,33 +60,38 @@ struct DrawingOverlayView: View {
 
                 Divider()
 
-                // MARK: - Image + Drawing Area (synced transforms)
+                // MARK: - Drawing Canvas
                 GeometryReader { geo in
-                    ZStack {
+                    ZStack(alignment: .center) {
                         if let image = editorVM.selectedImage {
                             ZStack {
                                 Image(uiImage: image)
                                     .resizable()
                                     .scaledToFit()
-
-                                DrawingCanvasView(
-                                    currentDrawing: editorVM.drawingVM.currentDrawing,
-                                    onDrawingChanged: {
-                                        editorVM.drawingVM.pushDrawingToHistory($0)
-                                    }
-                                )
-                                .id(editorVM.drawingVM.drawingVersion)
+                                    .overlay(
+                                        GeometryReader { imageGeo in
+                                            DrawingCanvasView(
+                                                currentDrawing: editorVM.drawingVM.currentDrawing,
+                                                onDrawingChanged: {
+                                                    editorVM.drawingVM.pushDrawingToHistory($0)
+                                                }
+                                            )
+                                            .frame(width: imageGeo.size.width, height: imageGeo.size.height)
+                                            .id(editorVM.drawingVM.drawingVersion)
+                                            .onAppear {
+                                                canvasSize = imageGeo.size
+                                            }
+                                        }
+                                    )
                             }
                             .scaleEffect(editorVM.imageScale)
                             .rotationEffect(editorVM.rotationAngle)
                             .offset(editorVM.imageOffset)
-                            .background(GeometryReader { innerGeo in
-                                Color.clear.onAppear {
-                                    canvasSize = innerGeo.size
-                                }
-                            })
+                            .clipped()
                         }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .clipped()
                 }
             }
         }

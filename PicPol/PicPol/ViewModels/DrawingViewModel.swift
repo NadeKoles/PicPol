@@ -5,8 +5,6 @@
 //  Created by Nadia on 19/05/2025.
 //
 
-// DrawingViewModel.swift
-
 import Foundation
 import SwiftUI
 import PencilKit
@@ -91,11 +89,21 @@ class DrawingViewModel: ObservableObject {
     ) {
         guard let baseImage else { return }
 
-        let renderer = UIGraphicsImageRenderer(size: baseImage.size)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.opaque = false
+        format.scale = baseImage.scale
+        
+        let renderer = UIGraphicsImageRenderer(size: baseImage.size, format: format)
         let combinedImage = renderer.image { context in
             baseImage.draw(in: CGRect(origin: .zero, size: baseImage.size))
 
-            let drawingBounds = currentDrawing.bounds
+            let canvasRect = CGRect(origin: .zero, size: canvasSize)
+            let drawingBounds = currentDrawing.bounds.intersection(canvasRect)
+            
+            guard !drawingBounds.isEmpty else {
+                return
+            }
+            
             let scaleX = baseImage.size.width / canvasSize.width
             let scaleY = baseImage.size.height / canvasSize.height
 
@@ -105,7 +113,10 @@ class DrawingViewModel: ObservableObject {
             )
 
             context.cgContext.saveGState()
-
+            
+            // Clip to image bounds BEFORE transformations to ensure drawing stays within bounds
+            context.cgContext.clip(to: CGRect(origin: .zero, size: baseImage.size))
+            
             context.cgContext.translateBy(
                 x: baseImage.size.width / 2 + translatedOffset.width,
                 y: baseImage.size.height / 2 + translatedOffset.height
@@ -119,10 +130,10 @@ class DrawingViewModel: ObservableObject {
                 x: -canvasSize.width / 2,
                 y: -canvasSize.height / 2
             )
-
+            
             let drawingImage = currentDrawing.image(from: drawingBounds, scale: baseImage.scale)
-            drawingImage.draw(in: CGRect(origin: .zero, size: canvasSize))
-
+            drawingImage.draw(in: canvasRect)
+            
             context.cgContext.restoreGState()
         }
 
@@ -131,7 +142,6 @@ class DrawingViewModel: ObservableObject {
         resetDrawingHistory()
     }
 
-    
     func forceCanvasSync() {
         withAnimation(.easeInOut(duration: 0.25)) {
             drawingVersion = UUID()

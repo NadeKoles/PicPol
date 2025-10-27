@@ -17,8 +17,7 @@ struct TextOverlayView: View {
         if let overlay = viewModel.textOverlay {
             Group {
                 if isEditing {
-                    
-                    // MARK: - Text Field Input
+                    // MARK: - Edit Mode
                     TextField("Enter text", text: Binding(
                         get: { overlay.text },
                         set: { viewModel.updateText($0) }
@@ -31,7 +30,6 @@ struct TextOverlayView: View {
                     .cornerRadius(8)
                     .shadow(radius: 4)
                 } else {
-                    
                     // MARK: - Display Mode
                     Text(overlay.text)
                         .font(.custom(overlay.fontName, size: overlay.fontSize))
@@ -63,6 +61,4 @@ struct TextOverlayView: View {
             )
         }
     }
-    
-    
 }
